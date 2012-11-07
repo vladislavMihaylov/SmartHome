@@ -24,20 +24,22 @@ void loop()
             sprintf(msg, "T = %dC, H = %d%%", 
                     sensor.getTemperatureInt(), sensor.getHumidityInt());
             lcd.print(msg);
-            break;
-        case DHT_ERROR_START_FAILED_1:
-            Serial.println("Error: start failed (stage 1)");
-            break;
-        case DHT_ERROR_START_FAILED_2:
-            Serial.println("Error: start failed (stage 2)");
-            break;
-        case DHT_ERROR_READ_TIMEOUT:
-            Serial.println("Error: read timeout");
-            break;
-        case DHT_ERROR_CHECKSUM_FAILURE:
-            Serial.println("Error: checksum error");
+            lcd.setCursor(0, 1);
             break;
     }
+    
+    int lightLevel = analogRead(A4);
+    int waterLevel = analogRead(A3);
+    
+    if(lightLevel >= 1000)
+    {
+        lightLevel = 999;
+    }
+    
+    char msg2[128];
+    
+    sprintf(msg2, "L = %d  W = %d  ", lightLevel, waterLevel);
+    lcd.print(msg2);
  
     delay(500);
 }
