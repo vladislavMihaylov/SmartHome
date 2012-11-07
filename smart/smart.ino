@@ -3,11 +3,13 @@
 
 LiquidCrystal lcd(4, 5, 10, 11, 12, 13);
 DHT sensor = DHT();
+int lightSignalPin = 8;
 
 void setup()
 {
     lcd.begin(16, 2);
     sensor.attach(A5);
+    pinMode(lightSignalPin, OUTPUT);
     delay(1000);
 }
 
@@ -34,6 +36,11 @@ void loop()
     if(lightLevel >= 1000)
     {
         lightLevel = 999;
+        digitalWrite(lightSignalPin, HIGH);
+    }
+    else
+    {
+        digitalWrite(lightSignalPin, LOW);
     }
     
     char msg2[128];
