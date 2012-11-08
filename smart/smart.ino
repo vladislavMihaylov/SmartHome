@@ -4,17 +4,41 @@
 LiquidCrystal lcd(4, 5, 10, 11, 12, 13);
 DHT sensor = DHT();
 int lightSignalPin = 8;
+int buttonPin = 9;
+int globalTemperature = 0;
+
+char *info[] = {"   Very cold   ", "cold" , "norm", "Poloneck", " \x4D\x61\xB9\xBa\x79 \xB8 \xBF\x70\xB8\xBA\x6F", " \x4D\x61\xB9\xBa\x79 \xB8 \xC1\x6F\x70\xBF\xC3"};
+
+
+void showInfo()
+{
+    lcd.print(info[globalTemperature / 5]);
+}
 
 void setup()
 {
+    Serial.begin(9600);
     lcd.begin(16, 2);
     sensor.attach(A5);
     pinMode(lightSignalPin, OUTPUT);
+    pinMode(buttonPin, INPUT);
+    digitalWrite(buttonPin, HIGH);
     delay(1000);
 }
 
 void loop()
-{
+{   
+    int but = digitalRead(buttonPin);
+    if(but == 1)
+    {
+      lcd.clear();
+      lcd.print("     O""\xE3""e""\xBD\xC4"":   ");
+      lcd.setCursor(0, 1);
+      showInfo();
+      //delay(1000);
+    }
+    
+
     // метод update заставляет сенсор выдать текущие измерения
     sensor.update();
  
@@ -22,11 +46,17 @@ void loop()
     {
         case DHT_ERROR_OK:
             char msg[128];
-            lcd.clear();
-            sprintf(msg, "T = %dC, H = %d%%", 
-                    sensor.getTemperatureInt(), sensor.getHumidityInt());
-            lcd.print(msg);
+            
+            globalTemperature = sensor.getTemperatureInt();
+            int humidity = sensor.getHumidityInt();
+            sprintf(msg, "T = %dC, H = %d%%", globalTemperature, humidity);
+            if(but == 0)
+            {
+               lcd.clear();
+               lcd.print(msg);
+            }
             lcd.setCursor(0, 1);
+            
             break;
     }
     
@@ -36,9 +66,12 @@ void loop()
     if(lightLevel >= 1000)
     {
         lightLevel = 999;
+    }
+    if(lightLevel >= 700)
+    {
         digitalWrite(lightSignalPin, HIGH);
     }
-    else
+    if(lightLevel < 700)
     {
         digitalWrite(lightSignalPin, LOW);
     }
@@ -46,7 +79,9 @@ void loop()
     char msg2[128];
     
     sprintf(msg2, "L = %d  W = %d  ", lightLevel, waterLevel);
-    lcd.print(msg2);
- 
+    if(but == 0)
+    {
+        lcd.print(msg2);
+    }
     delay(500);
 }
